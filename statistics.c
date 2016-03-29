@@ -27,6 +27,7 @@ struct root_stat {
     int item_len;
     int item_next;
     pthread_key_t item_key;
+    pthread_mutex_t item_lock;
     struct stat_item *items;
     struct cpu_stat *cpu_stats;
 };
@@ -45,6 +46,7 @@ void stat_root_init(int item_len)
     g_root->item_len = item_len;
     g_root->item_next = 0;
     pthread_key_create(&g_root->item_key, NULL);
+    pthread_mutex_init(&g_root->item_lock, NULL);
 
     g_root->items =
         (struct stat_item *)malloc(sizeof(struct stat_item) * g_root->item_len);
@@ -100,7 +102,23 @@ static struct thread_stat *stat_get_thread(struct root_stat *root)
 
 void stat_init_key(char *key, int *key_id)
 {
+    struct root_stat *root;
+    struct stat_item *item;
 
+    root = stat_get_root();
+    assert(root->item_next < root->item_len);
+
+    pthread_mutex_lock(&root->item_lock);
+    if (*key_id != -1)
+        goto unlock;
+
+    *key_id = root->item_next++;
+
+    item = root->items + *key_id;
+    strncpy(item->key, key, MAX_KEY_LEN);
+
+unlock:
+    pthread_mutex_unlock(&root->item_lock);
 }
 
 void stat_inc(int key_id)
