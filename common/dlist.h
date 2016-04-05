@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+
+#define container_of(ptr, type, member) ({			\
+	const typeof(((type *)0)->member) * __mptr = (ptr);	\
+	(type *)((char *)__mptr - offsetof(type, member)); })
+
 struct dlist_head {
     struct dlist_head *next;
     struct dlist_head *prev;
@@ -15,7 +21,7 @@ static inline int dlist_empty(struct dlist_head *list)
     return list->next == list;
 }
 
-static inline struct dlist_init(struct dlist_head *list)
+static inline void dlist_init(struct dlist_head *list)
 {
     list->next = list;
     list->prev = list;
@@ -29,7 +35,7 @@ static inline void _dlist_add(struct dlist_head *prev, struct dlist_head *next, 
     prev->next = new;
 }
 
-static inline void dlist_add_head(struct dlist_head *list, strcut dlist_head *link)
+static inline void dlist_add_head(struct dlist_head *list, struct dlist_head *link)
 {
     _dlist_add(list, list->next, link);
 }
@@ -50,7 +56,7 @@ static inline void dlist_del(struct dlist_head *link)
     _dlist_del(link->prev, link->next);
 }
 
-struct inline void dlist_del_init(struct dlist_head *link)
+static inline void dlist_del_init(struct dlist_head *link)
 {
     _dlist_del(link->prev, link->next);
     link->next = link;

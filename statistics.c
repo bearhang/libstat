@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <pthread.h>
 #include <assert.h>
 
@@ -33,13 +36,13 @@ struct root_stat {
 };
 
 static struct root_stat *g_root;
-static pthread_once_t *g_root_once = PTHREAD_ONCE_INIT;
+static pthread_once_t g_root_once = PTHREAD_ONCE_INIT;
 static int g_item_len = DEFAULT_ITEM_LEN;
 
 static void stat_root_init(void)
 {
     int i;
-    struct cpu_stat *cstat;
+    struct cpu_stat *cpu;
 
     g_root = (struct root_stat *)malloc(sizeof(*g_root));
     assert(g_root != NULL);
@@ -58,9 +61,9 @@ static void stat_root_init(void)
         (struct cpu_stat *)malloc(sizeof(struct cpu_stat) * g_root->cpu_count);
     assert(g_root->cpu_stats != NULL);
     for (i = 0; i < g_root->cpu_count; i++) {
-        cstat = g_root->cpu_stats + i;
-        pthread_mutex_init(&cstat->thread_lock, NULL);
-        dlist_init(&cstat->thread_list);
+        cpu = g_root->cpu_stats + i;
+        pthread_mutex_init(&cpu->thread_lock, NULL);
+        dlist_init(&cpu->thread_list);
     }
 }
 
@@ -93,7 +96,7 @@ static struct thread_stat *stat_set_thread(struct root_stat *root)
     cpu = root->cpu_stats + cpu_id;
     pthread_mutex_lock(&cpu->thread_lock);
     dlist_add_tail(&cpu->thread_list, &thread->thread_link);
-    pthrad_mutex_unlokc(&cpu->thread_lock);
+    pthread_mutex_unlock(&cpu->thread_lock);
 
     return thread;
 }
@@ -182,7 +185,7 @@ size_t stat_sum_thread_id(int key_id)
     return _stat_sum_thread(key_id);
 }
 
-static inlien size_t __stat_sum_cpu(struct root_stat *root,
+static inline size_t __stat_sum_cpu(struct root_stat *root,
         int key_id, int cpu_id)
 {
     size_t sum = 0;
@@ -233,7 +236,7 @@ static inline size_t _stat_sum(int key_id)
     assert(key_id >= 0 && key_id < root->item_next);
 
     for (i = 0; i < root->cpu_count; i++) {
-        sum += __stat_sum_cpu(root, key_id, cpu_id);
+        sum += __stat_sum_cpu(root, key_id, i);
     }
 
     return sum;
