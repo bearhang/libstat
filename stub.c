@@ -1,8 +1,11 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <pthread.h>
+#include <errno.h>
+#include <sched.h>
 #include "dlist.h"
 #include "statistics.h"
 
@@ -13,7 +16,7 @@
 void *stat_routine(void *data)
 {
     int cpu_id = (int)(long)data;
-    int round = cpu_id + 1;
+    int round = cpu_id + 10;
     cpu_set_t mask;
     CPU_ZERO(&mask);
     CPU_SET(cpu_id, &mask);

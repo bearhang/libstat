@@ -89,7 +89,7 @@ static void stat_root_init(void)
     g_root->items =
         (struct stat_item *)malloc(sizeof(struct stat_item) * g_root->item_len);
     assert(g_root->items != NULL);
-    for (i = 0; i < g_root->item_len, i++) {
+    for (i = 0; i < g_root->item_len; i++) {
         g_root->items[i].key_id = i;
     }
 
@@ -244,7 +244,7 @@ void stat_add(int key_id, size_t cnt)
     thread->items[key_id] += cnt;
 }
 
-static inline size_t _stat_sum_thread(struct stat_root *root, int key_id)
+static inline size_t _stat_sum_thread(struct root_stat *root, int key_id)
 {
     struct thread_stat *thread;
 
@@ -291,7 +291,7 @@ static inline size_t __stat_sum_cpu(struct root_stat *root,
     return sum;
 }
 
-static inline size_t _stat_sum_cpu(struct stat_root *root, int key_id)
+static inline size_t _stat_sum_cpu(struct root_stat *root, int key_id)
 {
     int cpu_id;
 
@@ -304,7 +304,7 @@ static inline size_t _stat_sum_cpu(struct stat_root *root, int key_id)
 
 size_t stat_sum_cpu_key(char *key)
 {
-    int key_id
+    int key_id;
     struct root_stat *root;
 
     root = stat_get_root();
