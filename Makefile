@@ -1,20 +1,31 @@
 CC = gcc
 
-OBJECTS = statistics.o stub.o
-INCLUDES = statistics.h common/dlist.h
+SOURCE_PATH = ./source
+COMMON_PATH = ./common
+TEST_PATH = ./test
+BIN_PATH = ./bin
 
-CCFLAGS = -g -Icommon/
-CCLIBRY = -lpthread 
+CFILES = $(wildcard $(SOURCE_PATH)/*.c)
+CFILES += $(wildcard $(COMMON_PATH)/*.c)
+CFILES += $(wildcard $(TEST_PATH)/*.c)
+
+CHEADS = $(wildcard $(SOURCE_PATH)/*.h)
+CHEADS += $(wildcard $(COMMON_PATH)/*.h)
+CHEADS += $(wildcard $(TEST_PATH)/*.h)
+
+OBJECTS = $(CFILES:%.c=%.o)
+
+CCFLAGS = -g
+CCFLAGS += $(sort $(addprefix -I, $(dir $(CHEADS))))
+
+CCLINKS = -lpthread 
 
 stub : $(OBJECTS)
-	$(CC) -o stub $(OBJECTS) $(CCLIBRY)
+	$(CC) -o $(BIN_PATH)/$@ $(OBJECTS) $(CCLINKS)
 	
-stub.o : stub.c $(INCLUDES)
-	$(CC) -c stub.c $(CCFLAGS) $(CCLIBRY)
-	
-statistics.o : statistics.c $(INCLUDES)
-	$(CC) -c statistics.c $(CCFLAGS) $(CCLIBRY)
+$(OBJECTS) : %.o : %.c $(CHEADS)
+	$(CC) -c $< -o $@ $(CCFLAGS)
 	
 .PHONY : clean
 clean :
-	rm stub $(OBJECTS)
+	rm $(BIN_PATH)/stub $(OBJECTS)
