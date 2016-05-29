@@ -3,7 +3,7 @@ CC = gcc
 OBJECTS = statistics.o stub.o
 INCLUDES = statistics.h common/dlist.h
 
-CCFLAGS = -Icommon/
+CCFLAGS = -g -Icommon/
 CCLIBRY = -lpthread 
 
 stub : $(OBJECTS)
