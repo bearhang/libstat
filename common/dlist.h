@@ -80,7 +80,7 @@ static inline void dlist_del_init(struct dlist_head *link)
     for (entry = dlist_entry((list)->next, typeof(*entry), member), \
         safe = dlist_entry(entry->member.next, typeof(*entry), member); \
         &entry->member != (list);   \
-        entry = safe, safe = dlist_entry(entry->member.next, typeof(*entry), member); )
+        entry = safe, safe = dlist_entry(entry->member.next, typeof(*entry), member))
 
 #ifdef __cplusplus
 }
